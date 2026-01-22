@@ -472,7 +472,7 @@ class OpenSetDetectorWithExamples(nn.Module):
             else:
                 prototype_label_names = dct['label_names']
         elif isinstance(class_prototypes_file, list):
-            p1, p2 = torch.load(class_prototypes_file[0]), torch.load(class_prototypes_file[1])
+            p1, p2 = torch.load(class_prototypes_file[0], weights_only=False), torch.load(class_prototypes_file[1], weights_only=False)
             if 'origin_label_names' in p1 or 'origin_label_names' in p2:
                 assert 'origin_label_names' in p2
                 oneshot_num_classes = len(p2['origin_label_names'])
