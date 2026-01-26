@@ -48,6 +48,7 @@ from detectron2.structures.masks import PolygonMasks
 from lib.dinov2.layers.block import Block
 from lib.regionprop import augment_rois, region_coord_2_abs_coord, abs_coord_2_region_coord, SpatialIntegral
 from lib.categories import SEEN_CLS_DICT, ALL_CLS_DICT
+from ...data import MetadataCatalog
 
 
 def elementwise_box_iou(boxes1, boxes2) -> Tuple[torch.Tensor]:
@@ -804,8 +805,8 @@ class OpenSetDetectorWithExamples(nn.Module):
             "num_sample_class": cfg.DE.TOPK,
             
             
-            "seen_cids": SEEN_CLS_DICT[cfg.DATASETS.TRAIN[0]],
-            "all_cids": ALL_CLS_DICT[cfg.DATASETS.TRAIN[0]],
+            "seen_cids": SEEN_CLS_DICT[cfg.DATASETS.TRAIN[0]] if cfg.DATASETS.TRAIN[0] in SEEN_CLS_DICT else MetadataCatalog.get(cfg.DATASETS.TRAIN[0]).thing_classes,
+            "all_cids": ALL_CLS_DICT[cfg.DATASETS.TRAIN[0]] if cfg.DATASETS.TRAIN[0] in ALL_CLS_DICT else MetadataCatalog.get(cfg.DATASETS.TRAIN[0]).thing_classes,
             "T_length": cfg.DE.T,
             
             "bg_cls_weight": cfg.DE.BG_CLS_LOSS_WEIGHT,
