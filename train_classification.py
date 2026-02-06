@@ -115,7 +115,7 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
                 os.makedirs(os.path.join("runs", output_dir), exist_ok=True)
-                torch.save(best_model_wts, os.path.join(f"runs/{output_dir}", f'resnet50_epoch_{epoch}.pth'))
+                # torch.save(best_model_wts, os.path.join(f"runs/{output_dir}", f'resnet50_epoch_{epoch}.pth'))
             if phase == 'validation':
                 val_acc_history.append(epoch_acc)
 
