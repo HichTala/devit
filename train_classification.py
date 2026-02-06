@@ -213,7 +213,7 @@ if __name__ == '__main__':
     }
 
     cfg = get_cfg()
-    cfg.merge_from_file(f"./configs/{args.dataset}/{args.shot}_shot.yaml")
+    cfg.merge_from_file(f"./configs/cross-domain/{args.dataset}/{args.shot}_shot.yaml")
     cfg.merge_from_list(["DE.OFFLINE_RPN_CONFIG", "configs/RPN/mask_rcnn_R_50_C4_1x_ovd_FSD.yaml"])
     cfg.freeze()
 
