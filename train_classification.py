@@ -127,7 +127,7 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25, is_ince
 
     # load best model weights
     model.load_state_dict(best_model_wts)
-    torch.save(best_model_wts, os.path.join("runs", 'best_model.pth'))
+    torch.save(best_model_wts, os.path.join(f"runs/{output_dir}", 'best_model.pth'))
     return model, val_acc_history
 
 
