@@ -7,7 +7,9 @@ datasets:
 
 """
 import contextlib
+import copy
 import io
+import json
 import os
 import tempfile
 
@@ -542,8 +544,6 @@ def hf_to_detectron2(dataset, split="train"):
 
     return records
 
-import json
-
 def hf_to_coco_dict(dataset, categories):
     coco = {
         "images": [],
@@ -593,27 +593,55 @@ def register_hf_data():
     seed = os.getenv("REPEAT_ID", 2026)
     dataset_name = os.getenv("DATASET")
 
-    dataset = load_fs_dataset(f"/lustre/fsn1/projects/rech/mvq/ubc18yy/datasets/{dataset_name}")
+    dataset = load_fs_dataset(f"HichTala/{dataset_name}")
+    og_dataset = copy.deepcopy(dataset["train"])
     classes = dataset["train"].features["objects"]["category"].feature.names
 
     id2label = dict(enumerate(classes))
     categories = [{"id": i, "name": name} for i, name in id2label.items()]
 
-    coco_dict, images_dict = hf_to_coco_dict(dataset["test"], categories=categories)
+    coco_dict, images_dict_test = hf_to_coco_dict(dataset["test"], categories=categories)
     coco_path = write_temp_coco(coco_dict)
 
     register_coco_instances(f"{dataset_name}_test", {}, coco_path, image_root=".")
-    DatasetCatalog.register(f"{dataset_name}_test_images", lambda: images_dict)
+    DatasetCatalog.register(f"{dataset_name}_test_images", lambda: images_dict_test)
     MetadataCatalog.get(f"{dataset_name}_test").set(thing_classes=classes, evaluator_type="coco")
+    del coco_dict
 
-    for shot in [1, 5, 10]:
-        name = f"{dataset_name}_{shot}shot"
-        dataset["train"].sampling(shots=shot, seed=int(seed))
-        records = hf_to_detectron2(dataset["train"])
-        DatasetCatalog.register(name, lambda: records)
-        MetadataCatalog.get(name).set(thing_classes=classes)
+    coco_dict, images_dict_val = hf_to_coco_dict(dataset["validation"], categories=categories)
+    coco_path = write_temp_coco(coco_dict)
+
+    register_coco_instances(f"{dataset_name}_val", {}, coco_path, image_root=".")
+    DatasetCatalog.register(f"{dataset_name}_val_images", lambda: images_dict_val)
+    MetadataCatalog.get(f"{dataset_name}_val").set(thing_classes=classes, evaluator_type="coco")
+    del coco_dict
+
+    name = f"{dataset_name}_1shot"
+    dataset["train"].sampling(shots=1, seed=int(seed))
+    records_1shot = hf_to_detectron2(dataset["train"])
+    DatasetCatalog.register(name, lambda: records_1shot)
+    MetadataCatalog.get(name).set(thing_classes=classes)
+    dataset["train"] = copy.deepcopy(og_dataset)
+
+    name = f"{dataset_name}_5shot"
+    dataset["train"].sampling(shots=5, seed=int(seed))
+    records_5shot = hf_to_detectron2(dataset["train"])
+    DatasetCatalog.register(name, lambda: records_5shot)
+    MetadataCatalog.get(name).set(thing_classes=classes)
+    dataset["train"] = copy.deepcopy(og_dataset)
+
+    name = f"{dataset_name}_10shot"
+    dataset["train"].sampling(shots=10, seed=int(seed))
+    records_10shot = hf_to_detectron2(dataset["train"])
+    DatasetCatalog.register(name, lambda: records_10shot)
+    MetadataCatalog.get(name).set(thing_classes=classes)
+    dataset["train"] = copy.deepcopy(og_dataset)
+
+    del og_dataset
+
 
 register_all_coco()
+_root = os.getenv("DETECTRON2_DATASETS", "datasets")
 register_hf_data()
 
 

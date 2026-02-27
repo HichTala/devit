@@ -146,7 +146,7 @@ def transforms_fn(example_batch, split):
 
 
 def main(cfg, dataset_name, shot, seed):
-    dataset_path = f"/lustre/fsn1/projects/rech/mvq/ubc18yy/datasets/crop_datasets/{dataset_name}_{shot}shot_{seed}"
+    dataset_path = f"HichTala/{dataset_name}_{shot}shot_{seed}"
     dataset = load_dataset(dataset_path)
     num_classes = len(dataset["train"].features["label"].names)
 
